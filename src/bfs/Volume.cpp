@@ -211,7 +211,7 @@ DeviceOpener::Open(const char *device, int partitionNr, int mode)
 				strcpy(szTmpStr, "SKYFS");	//skyfs partition
 				//printf("found skyfs partition!\n");
 				count++;
-				if (count==partitionNr){
+				if (count==partitionNr - 1){
 					//printf("saving partion data\n");
 					// copy stDrive info to DeviceOpener
 					memcpy(&partitionInfo,&stDrive,sizeof(DRIVEPACKET)); 
@@ -222,12 +222,13 @@ DeviceOpener::Open(const char *device, int partitionNr, int mode)
 				strcpy(szTmpStr, "BFS");	//bfs partition
 				//printf("found bfs partition!\n");
 				count++;
-				if (count==partitionNr){
+				if (count==partitionNr - 1){
 					//printf("saving partion data\n");
 					// copy stDrive info to DeviceOpener
 					memcpy(&partitionInfo,&stDrive,sizeof(DRIVEPACKET)); 
 					//printf("partitionInfo.dwNTRelativeSector=%u,stDrive.dwNTRelativeSector=%u\n",partitionInfo.dwNTRelativeSector,stDrive.dwNTRelativeSector);
 				}
+				break;
 			default:
 				strcpy(szTmpStr, "Unknown");
 				break;
@@ -238,7 +239,7 @@ DeviceOpener::Open(const char *device, int partitionNr, int mode)
 		wDrive++;
 	}
 
-	if(i==4)
+	if(wDrive == 4)
 		return INVALID_HANDLE_VALUE;
 
 	for(int LogiHard=0; LogiHard<50; LogiHard++) // scanning extended partitions
@@ -338,7 +339,7 @@ DeviceOpener::Open(const char *device, int partitionNr, int mode)
 					strcpy(szTmpStr, "BFS");	//bfs partition
 					//printf("found bfs partition!\n");
 					count++;
-					if (count==partitionNr){
+					if (count==partitionNr - 1){
 						//printf("saving partion data\n");
 						// copy stDrive info to DeviceOpener
 						memcpy(&partitionInfo,&stDrive,sizeof(DRIVEPACKET)); 
@@ -469,6 +470,7 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 	}else printf("DeviceOpener::Open: CreateFile success: 0x%p\n",fDevice);
 
 	nRet = ReadFile(fDevice,szSector,512,&dwBytes,0);
+	debug << "::Open nRet " << nRet << "\n";
 	
 	if(!nRet){
 		printf("DeviceOpene::Open: ReadFile error: %i\n",GetLastError());
@@ -501,6 +503,7 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 		if(stDrive.wType == EXTENDED_PART)
 			break;
 
+		debug << "PartType[" << i << "]: " << (int)PartitionTbl->chType << " expect " << PART_BFS << "\n";
 		if(PartitionTbl->chType == 0)
 			break;
 
@@ -542,11 +545,13 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 				strcpy(szTmpStr, "BFS");	//bfs partition
 				//printf("found bfs partition!\n");
 				count++;
-				if (count==partitionNr){
+				debug << "Found BFS partition " << count << "/" << partitionNr << "\n";
+				if (count==partitionNr - 1){
 					//printf("saving partion data\n");
 					// copy stDrive info to DeviceOpener
 					memcpy(&partitionInfo,&stDrive,sizeof(DRIVEPACKET)); 
 					//printf("partitionInfo.dwNTRelativeSector=%u,stDrive.dwNTRelativeSector=%u\n",partitionInfo.dwNTRelativeSector,stDrive.dwNTRelativeSector);
+					goto found;
 				}
 			default:
 				strcpy(szTmpStr, "Unknown");
@@ -558,8 +563,10 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 		wDrive++;
 	}
 
-	if(i==4)
+	if(i==4) {
+		debug << "PARTITION NOT FOUND\n";
 		return INVALID_HANDLE_VALUE;
+	}
 
 	for(int LogiHard=0; LogiHard<50; LogiHard++) // scanning extended partitions
 	{
@@ -668,6 +675,7 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 		}
 	}
 
+found:
 
 	CloseHandle(fDevice);
 	// open again but with NTCreateFile
@@ -679,6 +687,7 @@ DeviceOpener::Open(int diskNr, int partitionNr, int mode)
 	printf("Requested: \\Device\\HardDisk%i\\Partition%i\n",diskNr,partitionNr+1);
 	char disk[100];
 	sprintf(disk,"\\Device\\HardDisk%i\\Partition%i",diskNr,partitionNr+1);
+	debug << disk << "\n";
 	 WCHAR wsDisk[256];          // Unicode string
 	  MultiByteToWideChar( CP_ACP, 0, disk,
         strlen(disk)+1, wsDisk,   
@@ -1012,9 +1021,9 @@ Volume::Mount(const char *deviceName, int partitionNr, uint32 flags)
 //	printf("done opening\n");
 	int m_dwBytesPerSector = 512;
 	DWORD partStartSector = partitionInfo.dwNTRelativeSector;
-//	printf("partStartSector=%u\n",partStartSector);
+	debug << "partStartSector " << partStartSector << "\n";
 	fStartPos.QuadPart = (LONGLONG)m_dwBytesPerSector*partStartSector; 
-//	printf("partStartSector=%I64d\n",fStartPos.QuadPart);
+	debug << "partStartSector " << fStartPos.QuadPart;
 //	if (fDevice < B_OK)
 	if (fDevice == INVALID_HANDLE_VALUE)
 		//RETURN_ERROR(fDevice);
@@ -1157,9 +1166,9 @@ Volume::Mount(int diskNr, int partitionNr, uint32 flags)
 	int m_dwBytesPerSector = 512;
 // TODO: do we really still need this?
 	DWORD partStartSector = partitionInfo.dwNTRelativeSector;
-//	printf("partStartSector=%u\n",partStartSector);
+	debug << "partStartSector " << partStartSector << "\n";
 	fStartPos.QuadPart = (LONGLONG)m_dwBytesPerSector*partStartSector; 
-//	printf("partStartSector=%I64d\n",fStartPos.QuadPart);
+	debug << "partStartSector " << fStartPos.QuadPart << "\n";
 //	if (fDevice < B_OK)
 	if (fDevice == INVALID_HANDLE_VALUE)
 		//RETURN_ERROR(fDevice);

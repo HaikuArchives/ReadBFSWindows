@@ -52,7 +52,7 @@ int listDir(HWND hWnd, HTREEITEM * node, TV_ITEM * tvi,ofstream* debug, vector<V
 	uint32 num;
 	TreeData* td = reinterpret_cast<TreeData*>(tvi->lParam);
 	Volume* vv=(Volume*)td->extra;
-	Volume* v=&(Volume)volumes->at(td->volume);
+	Volume* v=(Volume*)&volumes->at(td->volume);
 	*debug<<"ListDir: "<<tvi->pszText<<" volume="<<v<<" vol.Name="<<v->Name()<<"   hWnd="<<hWnd<<endl;	debug->flush();
 	//if (vv->IsValidSuperBlock()) *debug<<"2: VALID SUPERBLOCK "<<vv<<"  td->volume="<<td->volume<<endl;
 	//else *debug<<"2: NO VALID SUPERBLOCK!!! "<<v<<"  td->volume="<<td->volume<<endl;

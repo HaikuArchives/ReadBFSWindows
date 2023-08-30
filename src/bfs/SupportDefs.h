@@ -86,7 +86,6 @@ typedef unsigned int uint32;
 #define B_RELATIVE_TIMEOUT	8
 
 // error codes
-#define LONG_MAX 2147483647L
 #pragma warning (disable: 4005)
 #define LONG_MIN (-LONG_MAX - 1L) 
 #pragma warning (default: 4005)

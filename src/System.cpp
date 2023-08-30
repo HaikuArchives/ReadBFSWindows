@@ -1,14 +1,15 @@
 #include "System.h"
 #include <stdio.h>
 
+extern std::ofstream debug;
 
 int read_pos(HANDLE fDevice, int64_ sStart, void* data, unsigned int size){
 	char * q = (char *)calloc(size,sizeof(char));
 	DWORD dwBytes;
 	LARGE_INTEGER sbStart;
 	sbStart.QuadPart = (LONGLONG)sStart;
-	//printf("sStart=%I64d, sizeof(data)=%i\n",sStart,size);
-	DWORD dwCur = SetFilePointer(fDevice,sbStart.LowPart,&sbStart.HighPart,FILE_BEGIN);
+	debug << "sStart " << sStart << ", size " << size << "\n";
+	//DWORD dwCur = SetFilePointer(fDevice,sbStart.LowPart,&sbStart.HighPart,FILE_BEGIN);
 	//int nRet = ReadFile(fDevice,q,size,&dwBytes,NULL);
 	int nRet;
 	NTSTATUS Status;
@@ -48,15 +49,15 @@ int read_pos(HANDLE fDevice, int64_ sStart, void* data, unsigned int size){
 		return nRet;
 	}
 	else {
-		//printf("!!!!!!!!!!!!!!!!!  read_pos: success !!!!!!!!!!!!!!!!!\n");
-		//printf("dwBytes=%d\n",dwBytes);
-		if (/*size==1024*/false){
+		debug << "!!!!!!!!!!!!!!!!!  read_pos: success !!!!!!!!!!!!!!!!!\n";
+		debug << "dwBytes" << dwBytes << "\n";
+		if (size==1024/*false*/){
 			for (unsigned int j=0;j<size;j++){
 				if ((char)q[j]!=0) 
-					printf("%.2x",(char)q[j]);
-				else printf("00");
+					debug << std::hex << (int)q[j];
+				else debug << "00";
 			}
-		//	printf("\nend_read_pos\n");
+			debug << "\nend_read_pos\n";
 		}
 		memcpy(data,q,size);
 	}
