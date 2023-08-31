@@ -2,13 +2,14 @@ Read BeFS from Windows
 ==========================
 Original author: Peter Speybrouck
 
-The code here appears as it was given to me by Peter, after I contacted him about [this forum post](https://www.haiku-os.org/community/forum/bfs_access_in_windows). I didn't touch it, but I made a copy and attempted to make it compile and ran into a lot of MSVC errors.
+The code here appears as it was given to me by Peter, after I contacted him about [this forum post](https://www.haiku-os.org/community/forum/bfs_access_in_windows).
+This version is patched to build with mingw and find Haiku partitions (there were some bugs in partition enumeration).
 
 Some things that could be done:
-* make it compile on MinGW
 * update the BFS code with the equivalent files from the Haiku repository
 * general cleanup
 * turn this into a Windows filesystem driver
+* recognize GPT partitions (currently the code implements its own parser for MBR partitions)
 
 Regarding a license, he said: 
 > The haiku code obviously keeps its licensing. You can do with my code whatever you want if you ask me. 
