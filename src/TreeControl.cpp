@@ -198,14 +198,14 @@ BOOL CALLBACK PropertiesDlgProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 					*/
 					case B_UINT8_TYPE:
 						{
-							byte tmp;
+							uint8_t tmp;
 							memcpy(&tmp,buff,1);
 							oss<<tmp;
 							break;
 						}
 					case B_INT8_TYPE:
 						{
-							byte tmp;
+							uint8_t tmp;
 							memcpy(&tmp,buff,1);
 							oss<<tmp;
 							break;
